@@ -7,40 +7,34 @@ if(strlen($_SESSION['alogin'])==0)
 header('location:index.php');
 }
 else{
-// Code for change password	
+	$imgid=intval($_GET['imgid']);
 if(isset($_POST['submit']))
-	{
-$password=md5($_POST['password']);
-$newpassword=md5($_POST['newpassword']);
-$username=$_SESSION['alogin'];
-	$sql ="SELECT Password FROM admin WHERE UserName=:username and Password=:password";
-$query= $dbh -> prepare($sql);
-$query-> bindParam(':username', $username, PDO::PARAM_STR);
-$query-> bindParam(':password', $password, PDO::PARAM_STR);
-$query-> execute();
-$results = $query -> fetchAll(PDO::FETCH_OBJ);
-if($query -> rowCount() > 0)
 {
-$con="update admin set Password=:newpassword where UserName=:username";
-$chngpwd1 = $dbh->prepare($con);
-$chngpwd1-> bindParam(':username', $username, PDO::PARAM_STR);
-$chngpwd1-> bindParam(':newpassword', $newpassword, PDO::PARAM_STR);
-$chngpwd1->execute();
-$msg="Cambio de contraseña exitoso";
-}
-else {
-$error="Tu contraseña actual es incorrecta";	
-}
-}
-?>
 
+$pimage=$_FILES["packageimage"]["name"];
+move_uploaded_file($_FILES["packageimage"]["tmp_name"],"pacakgeimages/".$_FILES["packageimage"]["name"]);
+$sql="update TblTourPackages set PackageImage=:pimage where PackageId=:imgid";
+$query = $dbh->prepare($sql);
+
+$query->bindParam(':imgid',$imgid,PDO::PARAM_STR);
+$query->bindParam(':pimage',$pimage,PDO::PARAM_STR);
+$query->execute();
+$msg="Paquete creado exitosamente";
+
+
+
+}
+
+	?>
 <!DOCTYPE HTML>
 <html>
 <head>
-<title>HBT | Administrador Cambiar Contraseña</title>
-
+<title>HBT | Creación del paquete de administración</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="keywords" content="Pooled Responsive web template, Bootstrap Web Templates, Flat Web Templates, Android Compatible web template, 
+Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, SonyEricsson, Motorola web design" />
 <script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
-
 <link href="css/bootstrap.min.css" rel='stylesheet' type='text/css' />
 <link href="css/style.css" rel='stylesheet' type='text/css' />
 <link rel="stylesheet" href="css/morris.css" type="text/css"/>
@@ -49,18 +43,6 @@ $error="Tu contraseña actual es incorrecta";
 <link href='//fonts.googleapis.com/css?family=Roboto:700,500,300,100italic,100,400' rel='stylesheet' type='text/css'/>
 <link href='//fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
 <link rel="stylesheet" href="css/icon-font.min.css" type='text/css' />
-<script type="text/javascript">
-function valid()
-{
-if(document.chngpwd.newpassword.value!= document.chngpwd.confirmpassword.value)
-{
-alert("Los campos Nueva contraseña y Confirmar contraseña no coinciden  !!");
-document.chngpwd.confirmpassword.focus();
-return false;
-}
-return true;
-}
-</script>
   <style>
 		.errorWrap {
     padding: 10px;
@@ -93,66 +75,71 @@ return true;
 				</div>
 <!--heder end here-->
 	<ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="dashboard.php">Inicio</a><i class="fa fa-angle-right"></i>Cambiar la contraseña</li>
+                <li class="breadcrumb-item"><a href="index.html">Inicio</a><i class="fa fa-angle-right"></i>Actualizar imagen del paquete</li>
             </ol>
 		<!--grid-->
  	<div class="grid-form">
-
+ 
+<!---->
   <div class="grid-form1">
-
+  	       <h3>Actualizar imagen del paquete </h3>
   	        	  <?php if($error){?><div class="errorWrap"><strong>ERROR</strong>:<?php echo htmlentities($error); ?> </div><?php } 
-				else if($msg){?><div class="succWrap"><strong>EXITOSO</strong>:<?php echo htmlentities($msg); ?> </div><?php }?>
-				
-  <div class="panel-body">
-					<form  name="chngpwd" method="post" class="form-horizontal" onSubmit="return valid();">
+				else if($msg){?><div class="succWrap"><strong>COMPLETADO</strong>:<?php echo htmlentities($msg); ?> </div><?php }?>
+  	         <div class="tab-content">
+						<div class="tab-pane active" id="horizontal-form">
+							<form class="form-horizontal" name="package" method="post" enctype="multipart/form-data">
+						<?php 
+$imgid=intval($_GET['imgid']);
+$sql = "SELECT PackageImage from TblTourPackages where PackageId=:imgid";
+$query = $dbh -> prepare($sql);
+$query -> bindParam(':imgid', $imgid, PDO::PARAM_STR);
+$query->execute();
+$results=$query->fetchAll(PDO::FETCH_OBJ);
+$cnt=1;
+if($query->rowCount() > 0)
+{
+foreach($results as $result)
+{	?>	
+<div class="form-group">
+<label for="focusedinput" class="col-sm-2 control-label"> Imagen del paquete </label>
+<div class="col-sm-8">
+<img src="pacakgeimages/<?php echo htmlentities($result->PackageImage);?>" width="200">
+</div>
+</div>
+																					
+<div class="form-group">
+									<label for="focusedinput" class="col-sm-2 control-label">Nueva imagen</label>
+									<div class="col-sm-8">
+										<input type="file" name="packageimage" id="packageimage" required>
+									</div>
+								</div>	
+								<?php }} ?>
 
-						<div class="form-group">
-							<label class="col-md-2 control-label">Contraseña actual</label>
-							<div class="col-md-8">
-								<div class="input-group">
-									<span class="input-group-addon">
-										<i class="fa fa-key"></i>
-									</span>
-									<input type="password" name="password" class="form-control1" id="exampleInputPassword1" placeholder="Contraseña actual" required="">
-								</div>
-							</div>
-						</div>
+								<div class="row">
+			<div class="col-sm-8 col-sm-offset-2">
+				<button type="submit" name="submit" class="btn-primary btn">Actualizar</button>
 
-	<div class="form-group">
-							<label class="col-md-2 control-label">Nueva contraseña</label>
-							<div class="col-md-8">
-								<div class="input-group">
-									<span class="input-group-addon">
-										<i class="fa fa-key"></i>
-									</span>
-									<input type="password" class="form-control1" name="newpassword" id="newpassword" placeholder="Nueva contraseña" required="">
-								</div>
-							</div>
-						</div>
-
-	<div class="form-group">
-							<label class="col-md-2 control-label">Confirmar Contraseña</label>
-							<div class="col-md-8">
-								<div class="input-group">
-									<span class="input-group-addon">
-										<i class="fa fa-key"></i>
-									</span>
-									<input type="password" class="form-control1" name="confirmpassword" id="confirmpassword" placeholder="Confirmar Contraseña" required="">
-								</div>
-							</div>
-						</div>
-
-						<div class="col-sm-8 col-sm-offset-2">
-				<button type="submit" name="submit" class="btn-primary btn">Enviar</button>
-				<button type="reset" class="btn-inverse btn">Restablecer</button>
 			</div>
 		</div>
-			
+						
+					
+						
+						
+						
+					</div>
+					
 					</form>
-	</div>
-</div>
-</div>
-</div>
+
+     
+      
+
+      
+      <div class="panel-footer">
+		
+	 </div>
+    </form>
+  </div>
+ 	</div>
  	<!--//grid-->
 
 <!-- script-for sticky-nav -->
@@ -183,7 +170,7 @@ return true;
 </div>
   <!--//content-inner-->
 		<!--/sidebar-menu-->
-				<?php include('includes/sidebarmenu.php');?>
+					<?php include('includes/sidebarmenu.php');?>
 							  <div class="clearfix"></div>		
 							</div>
 							<script>
@@ -206,10 +193,13 @@ return true;
 											toggle = !toggle;
 										});
 							</script>
+<!--js -->
 <script src="js/jquery.nicescroll.js"></script>
 <script src="js/scripts.js"></script>
-<script src="js/bootstrap.min.js"></script>
-   
+<!-- Bootstrap Core JavaScript -->
+   <script src="js/bootstrap.min.js"></script>
+   <!-- /Bootstrap Core JavaScript -->	   
+
 </body>
 </html>
 <?php } ?>
